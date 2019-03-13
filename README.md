@@ -1,3 +1,9 @@
+This modification to Ivaar's Skillchains Addon sends messages to the windower console. 
+The Gearswap addon then reads these messages and executes functions.
+To be used with Gearswap and PatsAutoskillchain https://github.com/Crobitaille/PatriclisGearswap/blob/master/Libs/PatsAutoskillchain.lua
+Works together to equip skillchain gear when a closing skillchains.
+
+
 # SkillChains
 ### Active Battle Skillchain Display.
 
