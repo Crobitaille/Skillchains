@@ -188,18 +188,39 @@ function add_skills(t, abilities, active, cat, aeonic)
     return t
 end
 
+function add_skills_gearswap(t, abilities, active, cat, aeonic)
+    local tt = {{},{},{},{}}
+    local list = ""
+    for k=1,#abilities do local ability = skills[cat][abilities[k]]
+        if ability then
+            local lv, prop = check_props(active, aeonic_prop(ability, info.player))
+            if prop then
+                list = list .. ability.en .. ",";
+            end
+        end
+    end
+    return list;
+end
+
+
 function check_results(reson)
     local t = {}
+    local u = "Skillchains,"
     if settings.Show.spell[info.job] and info.job == 'SCH' then
         t = add_skills(t, {1,2,3,4,5,6,7,8}, reson.active, 20)
+        u = u .. add_skills_gearswap(t, {1,2,3,4,5,6,7,8}, reson.active, 20)
     elseif settings.Show.spell[info.job] and info.job == 'BLU' then
         t = add_skills(t, windower.ffxi.get_mjob_data().spells, reson.active, 4)
+        u = u .. add_skills_gearswap(t, windower.ffxi.get_mjob_data().spells, reson.active, 4)
     elseif settings.Show.pet[info.job] and windower.ffxi.get_mob_by_target('pet') then
         t = add_skills(t, windower.ffxi.get_abilities().job_abilities, reson.active, 13)
+        u = u .. add_skills_gearswap(t, windower.ffxi.get_abilities().job_abilities, reson.active, 13)
     end
     if settings.Show.weapon[info.job] then
         t = add_skills(t, windower.ffxi.get_abilities().weapon_skills, reson.active, 3, info.aeonic and aeonic_am(reson.step))
+        u = u .. add_skills_gearswap(t, windower.ffxi.get_abilities().weapon_skills, reson.active, 3, info.aeonic and aeonic_am(reson.step))
     end
+    windower.send_command('gs c ' .. u)
     return _raw.table.concat(t, '\n')
 end
 
@@ -220,6 +241,7 @@ function do_stuff()
     for k,v in pairs(resonating) do
         if v.ts and now-v.ts > v.dur then
             resonating[k] = nil
+            windower.send_command('gs c ClearSkillchains')
         end
     end
     if targ and targ.hpp > 0 and resonating[targ.id] and resonating[targ.id].dur-(now-resonating[targ.id].ts) > 0 then
@@ -235,6 +257,7 @@ function do_stuff()
             resonating[targ.id].timer = 'Burst %d':format(timer)
         else
             resonating[targ.id] = nil
+            windower.send_command('gs c ClearSkillchains')
             return
         end
         resonating[targ.id].props = resonating[targ.id].props or
@@ -243,6 +266,10 @@ function do_stuff()
             resonating[targ.id].step > 1 and settings.Show.burst[info.job] and '(%s)':format(colorize(sc_info[resonating[targ.id].active[1]].ele)) or ''
         skill_props:update(resonating[targ.id])
         skill_props:show()
+        local str = ""
+        for k,v in pairs(resonating[targ.id].active) do
+            str = str .. v .." "
+        end
     elseif not visible then
         skill_props:hide()
     end
